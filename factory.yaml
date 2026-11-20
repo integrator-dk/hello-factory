@@ -3,12 +3,12 @@ kind: Solution
 metadata:
   id: hello-factory
   name: hello-factory
-  description: Testløsning, der beviser hele vejen fra repo til drift på en Docker-host med Entra-login.
+  description: Test solution that proves the whole way from repo to operations on a Docker host with Entra login.
   owner: allan.frost@integrator.dk
   customer: internal
   solutionType: web-app
   lifecycle: build
-  version: 1.0.2
+  version: 1.1.0
   repo: https://github.com/integrator-dk/hello-factory
   tags: [demo, internal]
 spec:
@@ -49,3 +49,11 @@ spec:
     tier: none
   dependencies: [factory-docker-host]
   decisions: []
+  # Scheduled job on Factory's shared Prefect worker (standards/jobs, ADR-0012)
+  jobs:
+    - name: heartbeat
+      description: Test job that logs a heartbeat every 15 minutes.
+      entrypoint: flows/heartbeat.py:heartbeat
+      schedule: "*/15 * * * *"
+      cpu: 0.25
+      memoryMb: 256
