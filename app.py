@@ -22,7 +22,7 @@ header{{background:#1F2A47;color:#fff;padding:14px 24px;font-family:Barlow,sans-
 main{{max-width:640px;margin:40px auto;background:#fff;border:1px solid #E2E6EE;border-top:4px solid #007F83;border-radius:10px;padding:24px}}
 h1{{font-family:Barlow,sans-serif;margin:0 0 8px}} .v{{color:#E6007E;font-weight:600}} dt{{color:#66708A}} dd{{margin:0 0 8px;font-weight:600}}</style>
 </head><body><header>Integrator <strong>hello-factory</strong></header><main>
-<h1>Hej{name} 👋</h1><p>Denne løsning kører på en Docker-host, som Integrator Software Factory administrerer.</p>
+<h1>Hej{name} 👋</h1><p>Denne løsning (blå/grøn-testet) kører på en Docker-host, som Integrator Software Factory administrerer.</p>
 <dl><dt>Version</dt><dd class="v">{version}</dd><dt>Container</dt><dd>{host}</dd><dt>Startet</dt><dd>{started}</dd></dl>
 </main></body></html>"""
 
