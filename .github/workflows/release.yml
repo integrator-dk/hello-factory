@@ -52,7 +52,8 @@ jobs:
         run: |
           TOKEN=$(curl -sS -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
             "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=https://factory.integrator.dk" | jq -r .value)
-          jq -n --arg v "$VERSION" --arg i "$IMAGE" --arg n "$(git log -1 --pretty=%B)" \
-            '{solution:"hello-factory", version:$v, image:$i, notes:$n}' |
+          # factory.yaml ships with the version (ADR-0013): it applies in Factory when the version goes live.
+          jq -n --arg v "$VERSION" --arg i "$IMAGE" --arg n "$(git log -1 --pretty=%B)" --rawfile m factory.yaml \
+            '{solution:"hello-factory", version:$v, image:$i, notes:$n, manifest:$m}' |
           curl -fsS -X POST https://factory.integrator.dk/api/releases/register \
             -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d @- | jq .
