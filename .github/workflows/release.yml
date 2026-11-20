@@ -1,0 +1,52 @@
+name: release
+
+# Build, test and publish the image, then tell Factory that a new version is ready
+# (standards/cicd in integrator-dk/factory). Factory decides when it is deployed.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write   # push to ghcr.io with GITHUB_TOKEN
+  id-token: write   # GitHub OIDC token for Factory; no secrets
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Version from factory.yaml
+        id: version
+        run: echo "version=$(grep -m1 -E '^  version:' factory.yaml | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+
+      - name: Tests
+        run: python -m unittest -v
+
+      - name: Build and push image
+        id: push
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          IMAGE=ghcr.io/integrator-dk/hello-factory
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          docker build --build-arg VERSION="$VERSION" -t "$IMAGE:$VERSION" .
+          docker run -d --name smoke -p 8080:8080 "$IMAGE:$VERSION"
+          for i in $(seq 1 10); do curl -fs localhost:8080/healthz && break; sleep 1; done
+          docker rm -f smoke
+          docker push "$IMAGE:$VERSION"
+          echo "image=$(docker inspect --format='{{index .RepoDigests 0}}' "$IMAGE:$VERSION")" >> "$GITHUB_OUTPUT"
+
+      - name: Register release with Factory
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          IMAGE: ${{ steps.push.outputs.image }}
+        run: |
+          TOKEN=$(curl -sS -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=https://factory.integrator.dk" | jq -r .value)
+          jq -n --arg v "$VERSION" --arg i "$IMAGE" --arg n "$(git log -1 --pretty=%B)" \
+            '{solution:"hello-factory", version:$v, image:$i, notes:$n}' |
+          curl -fsS -X POST https://factory.integrator.dk/api/releases/register \
+            -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d @- | jq .

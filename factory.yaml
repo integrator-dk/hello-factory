@@ -1,0 +1,51 @@
+apiVersion: factory.integrator.dk/v1
+kind: Solution
+metadata:
+  id: hello-factory
+  name: hello-factory
+  description: Testløsning, der beviser hele vejen fra repo til drift på en Docker-host med Entra-login.
+  owner: allan.frost@integrator.dk
+  customer: internal
+  solutionType: web-app
+  lifecycle: build
+  version: 1.0.0
+  repo: https://github.com/integrator-dk/hello-factory
+  tags: [demo, internal]
+spec:
+  platform:
+    provider: docker-host
+    runtime: docker
+    host: azure-weu-1
+    port: 8080
+    cpu: 0.1
+    memoryMb: 64
+  environments:
+    - name: prod
+      url: https://hello-factory.apps.integrator.dk
+      healthUrl: https://hello-factory.apps.integrator.dk/healthz
+  auth:
+    method: entra-id
+  data:
+    classification: internal
+    stores: []
+    residency: EU
+  observability:
+    appInsightsResourceId: ""
+    p95TargetMs: 1000
+    errorRateTargetPct: 1
+  backup:
+    policy: none-stateless
+  support:
+    jiraLabel: factory-hello-factory
+    channels: [github]
+  autonomy:
+    maxLevel: L2
+    serviceWindow: daily 06:00-07:00 Europe/Copenhagen
+    approvers: [allan.frost@integrator.dk]
+  budget:
+    monthlyInfraDkk: 0
+    monthlyLlmUsd: 0
+  sla:
+    tier: none
+  dependencies: [factory-docker-host]
+  decisions: []
