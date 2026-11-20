@@ -1,7 +1,7 @@
 name: release
 
-# Build, test and publish the image, then tell Factory that a new version is ready
-# (standards/cicd in integrator-dk/factory). Factory decides when it is deployed.
+# Build, test and publish the image to Factory's registry, then tell Factory that a new
+# version is ready (standards/cicd in integrator-dk/factory). Factory decides when it is deployed.
 on:
   push:
     branches: [main]
@@ -9,8 +9,7 @@ on:
 
 permissions:
   contents: read
-  packages: write   # push to ghcr.io with GITHUB_TOKEN
-  id-token: write   # GitHub OIDC token for Factory; no secrets
+  id-token: write   # GitHub OIDC: push to Factory's ACR and register with Factory; no secrets
 
 jobs:
   release:
@@ -25,13 +24,20 @@ jobs:
       - name: Tests
         run: python -m unittest -v
 
-      - name: Build and push image
+      - name: Azure login (OIDC, push identity id-hello-factory-push)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          allow-no-subscriptions: true
+
+      - name: Build, smoke test and push image
         id: push
         env:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
-          IMAGE=ghcr.io/integrator-dk/hello-factory
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          az acr login -n "${{ vars.FACTORY_ACR }}"
+          IMAGE="${{ vars.FACTORY_ACR }}.azurecr.io/hello-factory"
           docker build --build-arg VERSION="$VERSION" -t "$IMAGE:$VERSION" .
           docker run -d --name smoke -p 8080:8080 "$IMAGE:$VERSION"
           for i in $(seq 1 10); do curl -fs localhost:8080/healthz && break; sleep 1; done

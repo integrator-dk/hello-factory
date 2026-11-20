@@ -8,7 +8,7 @@ metadata:
   customer: internal
   solutionType: web-app
   lifecycle: build
-  version: 1.0.0
+  version: 1.0.1
   repo: https://github.com/integrator-dk/hello-factory
   tags: [demo, internal]
 spec:
