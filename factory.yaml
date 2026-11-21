@@ -8,9 +8,20 @@ metadata:
   customer: internal
   solutionType: web-app
   lifecycle: build
-  version: 1.1.1
+  version: 1.1.2
   repo: https://github.com/integrator-dk/hello-factory
   tags: [demo, internal]
+  purpose: Prove that a solution can go all the way from a GitHub repo to operations on a Factory Docker host, with Entra sign-in, releases, rollback, jobs and monitoring.
+  howItWorks: |
+    - A small Python web app that greets the signed-in user (name from Entra ID via the host's login).
+    - `/healthz` reports status and version; Factory checks it and restarts the container if it fails.
+    - A Prefect job, `heartbeat`, runs every 15 minutes on Factory's shared worker.
+    - Releases come from GitHub Actions; Factory deploys them blue/green.
+  users: Integrator's Factory team, for testing.
+  contacts:
+    - name: Allan Frost
+      role: Product owner
+      email: allan.frost@integrator.dk
 spec:
   platform:
     provider: docker-host
