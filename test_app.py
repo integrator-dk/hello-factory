@@ -28,6 +28,21 @@ class AppTest(unittest.TestCase):
         with urllib.request.urlopen(req) as r:
             self.assertIn("Hej, Allan", r.read().decode())
 
+    def test_page_footer_shows_running_version(self):
+        original = app.VERSION
+        app.VERSION = "1.1.1"
+        try:
+            with urllib.request.urlopen(self.base + "/") as r:
+                body = r.read().decode()
+        finally:
+            app.VERSION = original
+        self.assertRegex(body, r"<footer[^>]*>hello-factory 1\.1\.1</footer>")
+
+    def test_healthz_unchanged(self):
+        with urllib.request.urlopen(f"{self.base}/healthz") as r:
+            self.assertEqual(r.headers["Content-Type"], "application/json")
+            self.assertEqual(json.loads(r.read()), {"status": "ok", "version": app.VERSION})
+
 
 if __name__ == "__main__":
     unittest.main()
