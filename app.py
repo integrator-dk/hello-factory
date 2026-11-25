@@ -20,10 +20,11 @@ PAGE = """<!doctype html><html lang="da"><head><meta charset="utf-8">
 <style>body{{margin:0;font-family:'Open Sans',sans-serif;background:#F4F6F9;color:#1F2A47}}
 header{{background:#1F2A47;color:#fff;padding:14px 24px;font-family:Barlow,sans-serif;font-size:18px}}
 main{{max-width:640px;margin:40px auto;background:#fff;border:1px solid #E2E6EE;border-top:4px solid #007F83;border-radius:10px;padding:24px}}
-h1{{font-family:Barlow,sans-serif;margin:0 0 8px}} .v{{color:#E6007E;font-weight:600}} dt{{color:#66708A}} dd{{margin:0 0 8px;font-weight:600}}
+h1{{font-family:Barlow,sans-serif;margin:0 0 8px}} .tagline{{margin:0 0 16px;color:#007F83;font-size:14px}} .v{{color:#E6007E;font-weight:600}} dt{{color:#66708A}} dd{{margin:0 0 8px;font-weight:600}}
 footer{{max-width:640px;margin:0 auto 40px;text-align:center;font-size:13px;color:#66708A}} footer a{{color:#007F83}}</style>
 </head><body><header>Integrator <strong>hello-factory</strong></header><main>
-<h1>Hej{name} 👋</h1><p>Denne løsning (blå/grøn-testet) kører på en Docker-host, som Integrator Software Factory administrerer.</p>
+<h1>Hej{name} 👋</h1>
+<p class="tagline">Built and run by Integrator Software Factory</p><p>Denne løsning (blå/grøn-testet) kører på en Docker-host, som Integrator Software Factory administrerer.</p>
 <dl><dt>Version</dt><dd class="v">{version}</dd><dt>Container</dt><dd>{host}</dd><dt>Startet</dt><dd>{started}</dd></dl>
 </main><footer><a href="/healthz">Health</a></footer></body></html>"""
 

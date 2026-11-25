@@ -8,7 +8,7 @@ metadata:
   customer: internal
   solutionType: web-app
   lifecycle: build
-  version: 1.2.0
+  version: 1.3.0
   repo: https://github.com/integrator-dk/hello-factory
   tags: [demo, internal]
   purpose: Prove that a solution can go all the way from a GitHub repo to operations on a Factory Docker host, with Entra sign-in, releases, rollback, jobs and monitoring.
