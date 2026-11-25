@@ -1,4 +1,6 @@
 FROM python:3.12-slim
+# Pull in Debian security fixes newer than the base image (Factory image scan, standards/security).
+RUN apt-get update && apt-get upgrade -y --no-install-recommends && rm -rf /var/lib/apt/lists/*
 ARG VERSION=dev
 LABEL org.opencontainers.image.source=https://github.com/integrator-dk/hello-factory
 # PREFECT_HOME must be writable for the non-root user that runs jobs (standards/jobs).
