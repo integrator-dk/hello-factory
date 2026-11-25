@@ -10,3 +10,14 @@ Den mindste mulige løsning under Integrator Software Factory. Den beviser hele 
 Ny version: hæv `metadata.version` i `factory.yaml`, og push.
 
 **Drift:** se løsningen på https://factory.integrator.dk/solutions/hello-factory. Tilbagerulning: "Rul tilbage" på løsningens side.
+
+## Checks on pull requests
+
+`.github/workflows/ci.yml` runs on every pull request, without secrets:
+
+- Tests: `python -m unittest -v` (standard library only, nothing to install)
+- Secrets scan: `docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:v8.21.2 detect --source /repo --redact`
+- Image build, `/healthz` smoke test and import of the Prefect job
+- Trivy scan of the image; fixable CRITICAL vulnerabilities fail the check
+
+The repo has no lint configuration, so CI runs no lint step.

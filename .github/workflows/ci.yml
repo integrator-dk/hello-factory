@@ -1,0 +1,50 @@
+name: ci
+
+# CI on pull requests (standards/cicd step 1 and standards/testing in integrator-dk/factory).
+# No secrets and no cloud login: it also runs on pull requests from forks.
+# Release on main is a separate workflow (release.yml).
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # gitleaks scans the whole history
+
+      # The app and its tests use only the Python standard library, so there is nothing to install.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"   # same minor version as the image (python:3.12-slim)
+
+      - name: Tests
+        run: python -m unittest -v
+
+      - name: Secrets scan (gitleaks CLI, free for organisations)
+        run: docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:v8.21.2 detect --source /repo --redact --no-banner
+
+      - name: Build image and smoke test
+        run: |
+          docker build --build-arg VERSION=ci -t hello-factory:ci .
+          docker run -d --name smoke -p 8080:8080 hello-factory:ci
+          for i in $(seq 1 10); do curl -fs localhost:8080/healthz && break; sleep 1; done
+          curl -fsS localhost:8080/healthz
+          docker rm -f smoke
+          # The Prefect job runs from the same image: it must import.
+          docker run --rm --entrypoint python hello-factory:ci -c "import flows.heartbeat"
+
+      - name: Vulnerability scan of the image (fails on fixable CRITICAL)
+        run: >
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:0.58.1
+          image --exit-code 1 --severity CRITICAL --ignore-unfixed --no-progress hello-factory:ci
