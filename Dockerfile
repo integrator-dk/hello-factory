@@ -6,7 +6,7 @@ LABEL org.opencontainers.image.source=https://github.com/integrator-dk/hello-fac
 # PREFECT_HOME must be writable for the non-root user that runs jobs (standards/jobs).
 ENV APP_VERSION=$VERSION PYTHONUNBUFFERED=1 PREFECT_HOME=/tmp/prefect
 WORKDIR /app
-RUN pip install --no-cache-dir "prefect>=3,<4"
+RUN pip install --no-cache-dir "prefect==3.9.5"
 COPY app.py .
 COPY flows/ flows/
 USER 10001
